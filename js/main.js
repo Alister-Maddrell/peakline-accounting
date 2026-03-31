@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
     });
 
-    // Close mobile menu when a link is clicked
     mobileMenu.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', () => {
         hamburger.classList.remove('active');
@@ -44,11 +43,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     }, {
-      threshold: 0.1,
-      rootMargin: '0px 0px -40px 0px'
+      threshold: 0.05,
+      rootMargin: '50px 0px 0px 0px'
     });
 
-    fadeElements.forEach(el => fadeObserver.observe(el));
+    // Make all elements visible immediately on load, then observe for future ones
+    fadeElements.forEach(el => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight + 100 && rect.bottom > 0) {
+        el.classList.add('visible');
+      } else {
+        fadeObserver.observe(el);
+      }
+    });
+
+    // Also check on scroll for any missed elements
+    const checkFadeIns = () => {
+      fadeElements.forEach(el => {
+        if (!el.classList.contains('visible')) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top < window.innerHeight + 50) {
+            el.classList.add('visible');
+          }
+        }
+      });
+    };
+    window.addEventListener('scroll', checkFadeIns, { passive: true });
   }
 
   // ---- Stats counter animation ----
@@ -76,12 +96,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function update(currentTime) {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      // Ease out cubic
       const eased = 1 - Math.pow(1 - progress, 3);
       const current = Math.round(eased * target);
-
       el.textContent = prefix + current + suffix;
-
       if (progress < 1) {
         requestAnimationFrame(update);
       }
@@ -90,43 +107,57 @@ document.addEventListener('DOMContentLoaded', () => {
     requestAnimationFrame(update);
   }
 
-  // ---- Testimonial Carousel ----
-  document.querySelectorAll('.testimonials').forEach(section => {
-    const track = section.querySelector('.testimonials-track');
-    const prevBtn = section.querySelector('.prev-btn');
-    const nextBtn = section.querySelector('.next-btn');
+  // ---- Testimonial Carousel (drag + auto-scroll) ----
+  document.querySelectorAll('.testimonials-track-wrapper').forEach(wrapper => {
+    const track = wrapper.querySelector('.testimonials-track');
+    if (!track) return;
 
-    if (!track || !prevBtn || !nextBtn) return;
+    let isDown = false;
+    let startX;
+    let scrollLeft;
 
-    const cards = track.querySelectorAll('.testimonial-card');
-    if (cards.length === 0) return;
+    wrapper.style.cursor = 'grab';
 
-    let currentIndex = 0;
+    wrapper.addEventListener('mousedown', (e) => {
+      isDown = true;
+      wrapper.style.cursor = 'grabbing';
+      startX = e.pageX - wrapper.offsetLeft;
+      scrollLeft = wrapper.scrollLeft;
+      track.style.transition = 'none';
+    });
 
-    function getCardWidth() {
-      const card = cards[0];
-      const style = getComputedStyle(track);
-      const gap = parseInt(style.gap) || 24;
-      return card.offsetWidth + gap;
-    }
+    wrapper.addEventListener('mouseleave', () => {
+      isDown = false;
+      wrapper.style.cursor = 'grab';
+    });
 
-    function scrollTo(index) {
-      const maxIndex = Math.max(0, cards.length - getVisibleCards());
-      currentIndex = Math.max(0, Math.min(index, maxIndex));
-      track.style.transform = `translateX(-${currentIndex * getCardWidth()}px)`;
-    }
+    wrapper.addEventListener('mouseup', () => {
+      isDown = false;
+      wrapper.style.cursor = 'grab';
+    });
 
-    function getVisibleCards() {
-      const wrapper = track.parentElement;
-      const cardWidth = getCardWidth();
-      return Math.floor(wrapper.offsetWidth / cardWidth) || 1;
-    }
+    wrapper.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - wrapper.offsetLeft;
+      const walk = (x - startX) * 1.5;
+      wrapper.scrollLeft = scrollLeft - walk;
+    });
 
-    nextBtn.addEventListener('click', () => scrollTo(currentIndex + 1));
-    prevBtn.addEventListener('click', () => scrollTo(currentIndex - 1));
+    // Enable native scroll
+    wrapper.style.overflowX = 'auto';
+    wrapper.style.scrollSnapType = 'x mandatory';
+    wrapper.style.scrollbarWidth = 'none';
+  });
 
-    // Reset on resize
-    window.addEventListener('resize', () => scrollTo(currentIndex));
+  // ---- Packages Scroll Button ----
+  document.querySelectorAll('.packages-scroll-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const scroll = btn.closest('.packages-scroll-wrapper').querySelector('.packages-scroll');
+      if (scroll) {
+        scroll.scrollBy({ left: 300, behavior: 'smooth' });
+      }
+    });
   });
 
   // ---- FAQ Accordion ----
@@ -139,11 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       question.addEventListener('click', () => {
         const isActive = item.classList.contains('active');
-
-        // Close all items in this list
         items.forEach(other => other.classList.remove('active'));
-
-        // Open clicked item if it wasn't already open
         if (!isActive) {
           item.classList.add('active');
         }
