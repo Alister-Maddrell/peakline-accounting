@@ -404,8 +404,12 @@ h3 {
 .hero-image {
   width: 100vw;
   margin-left: calc(-50vw + 50%);
-  margin-top: 60px;
+  margin-top: 48px;
   overflow: hidden;
+}
+
+.hero .brand-ticker-wrapper ~ .hero-image {
+  margin-top: 0;
 }
 
 .hero-image img {
@@ -449,24 +453,38 @@ h3 {
 
 .brand-ticker-wrapper {
   overflow: hidden;
-  padding: 20px 0;
+  padding: 16px 0;
   border-top: 1px solid #E5E5E5;
-  border-bottom: 1px solid #E5E5E5;
   margin-top: 48px;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  margin-bottom: 0;
+}
+
+/* Remove gap between ticker and hero image */
+.brand-ticker-wrapper + .hero-image {
+  margin-top: 0;
 }
 
 .brand-ticker {
   display: flex;
   align-items: center;
-  gap: 64px;
-  animation: brandTicker 25s linear infinite;
-  width: max-content;
+  animation: brandTicker 20s linear infinite;
+  white-space: nowrap;
+}
+
+.brand-ticker-set {
+  display: flex;
+  align-items: center;
+  gap: 56px;
+  padding-right: 56px;
+  flex-shrink: 0;
 }
 
 .brand-ticker img {
-  height: 20px;
+  height: 18px;
   width: auto;
-  opacity: 0.35;
+  opacity: 0.3;
   flex-shrink: 0;
   filter: grayscale(100%);
 }
@@ -486,13 +504,19 @@ h3 {
 
 .testimonial-marquee {
   display: flex;
-  gap: 16px;
-  animation: testimonialScroll 40s linear infinite;
-  width: max-content;
+  animation: testimonialScroll 45s linear infinite;
+  white-space: nowrap;
 }
 
 .testimonial-marquee:hover {
   animation-play-state: paused;
+}
+
+.testimonial-marquee-set {
+  display: flex;
+  gap: 16px;
+  padding-right: 16px;
+  flex-shrink: 0;
 }
 
 @keyframes testimonialScroll {
@@ -531,6 +555,19 @@ h3 {
   grid-template-columns: repeat(3, 1fr);
   gap: 48px;
   margin-bottom: 64px;
+}
+
+.value-prop-image {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.value-prop-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .value-prop h3 {
