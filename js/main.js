@@ -150,6 +150,68 @@ document.addEventListener('DOMContentLoaded', () => {
     wrapper.style.scrollbarWidth = 'none';
   });
 
+  // ---- Seamless Infinite Marquees ----
+  // Clone content until it's at least 2x viewport width, then animate by half
+  function initMarquee(wrapper, trackSelector, speed) {
+    const track = wrapper.querySelector(trackSelector);
+    if (!track) return;
+
+    // Get all original children as an array
+    const items = Array.from(track.children);
+    if (items.length === 0) return;
+
+    // Remove any previous set wrappers - flatten to raw items
+    const fragment = document.createDocumentFragment();
+    items.forEach(item => {
+      if (item.classList && (item.classList.contains('brand-ticker-set') || item.classList.contains('testimonial-marquee-set'))) {
+        // Unwrap set contents
+        Array.from(item.children).forEach(child => fragment.appendChild(child.cloneNode(true)));
+      } else {
+        fragment.appendChild(item.cloneNode(true));
+      }
+    });
+
+    // Clear track and add flattened items
+    track.innerHTML = '';
+    track.appendChild(fragment);
+
+    // Now measure one set of items
+    const originalItems = Array.from(track.children);
+    const setWidth = originalItems.reduce((w, el) => {
+      const style = getComputedStyle(el);
+      return w + el.offsetWidth + parseFloat(style.marginRight || 0);
+    }, 0);
+
+    // Clone items until we have at least 3x viewport width
+    const viewportWidth = window.innerWidth;
+    const clonesNeeded = Math.ceil((viewportWidth * 3) / setWidth);
+
+    for (let i = 0; i < clonesNeeded; i++) {
+      originalItems.forEach(item => {
+        track.appendChild(item.cloneNode(true));
+      });
+    }
+
+    // Set the animation offset to exactly one set width
+    track.style.setProperty('--marquee-offset', `-${setWidth}px`);
+    track.style.setProperty('--marquee-duration', `${setWidth / speed}s`);
+  }
+
+  // Init brand ticker
+  document.querySelectorAll('.brand-ticker-wrapper').forEach(wrapper => {
+    initMarquee(wrapper, '.brand-ticker', 50); // 50px per second
+  });
+
+  // Init testimonial marquee
+  document.querySelectorAll('.testimonial-marquee-wrapper').forEach(wrapper => {
+    initMarquee(wrapper, '.testimonial-marquee', 40); // 40px per second
+  });
+
+  // Init text ticker (social proof)
+  document.querySelectorAll('.ticker-wrapper').forEach(wrapper => {
+    initMarquee(wrapper, '.ticker', 30);
+  });
+
   // ---- Packages Scroll Button ----
   document.querySelectorAll('.packages-scroll-btn').forEach(btn => {
     btn.addEventListener('click', () => {
