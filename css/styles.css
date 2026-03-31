@@ -18,6 +18,11 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* GLOBAL: No border-radius anywhere */
+*, *::before, *::after {
+  border-radius: 0 !important;
+}
+
 body {
   font-family: 'Inter', sans-serif;
   font-weight: 500;
@@ -439,29 +444,58 @@ h3 {
 }
 
 /* ============================================
-   ICON TICKER (below hero)
+   BRAND TICKER (above hero image)
    ============================================ */
 
-.icon-ticker-wrapper {
+.brand-ticker-wrapper {
   overflow: hidden;
-  padding: 32px 0;
+  padding: 20px 0;
+  border-top: 1px solid #E5E5E5;
+  border-bottom: 1px solid #E5E5E5;
+  margin-top: 48px;
 }
 
-.icon-ticker {
+.brand-ticker {
   display: flex;
-  gap: 48px;
-  animation: iconTicker 30s linear infinite;
+  align-items: center;
+  gap: 64px;
+  animation: brandTicker 25s linear infinite;
   width: max-content;
 }
 
-.icon-ticker svg {
-  width: 32px;
-  height: 32px;
-  opacity: 0.4;
+.brand-ticker img {
+  height: 20px;
+  width: auto;
+  opacity: 0.35;
   flex-shrink: 0;
+  filter: grayscale(100%);
 }
 
-@keyframes iconTicker {
+@keyframes brandTicker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ============================================
+   TESTIMONIAL MARQUEE
+   ============================================ */
+
+.testimonial-marquee-wrapper {
+  overflow: hidden;
+}
+
+.testimonial-marquee {
+  display: flex;
+  gap: 16px;
+  animation: testimonialScroll 40s linear infinite;
+  width: max-content;
+}
+
+.testimonial-marquee:hover {
+  animation-play-state: paused;
+}
+
+@keyframes testimonialScroll {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
@@ -472,7 +506,7 @@ h3 {
 
 .callout {
   text-align: left;
-  padding: 100px 0;
+  padding: 80px 0 40px;
 }
 
 .callout h2 {
@@ -833,9 +867,9 @@ h3 {
 }
 
 .testimonial-card {
-  min-width: 290px;
-  flex: 0 0 calc(20% - 13px);
-  border-radius: 16px;
+  min-width: 300px;
+  width: 300px;
+  flex-shrink: 0;
   overflow: hidden;
   background: #ffffff;
   transition: transform 0.3s ease;
